@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2>Preview Extracted Content</h2>
+
+    <h3>Text</h3>
+    {% for text in text_pages %}
+      <pre>{{ text }}</pre>
+    {% endfor %}
+
+    <h3>Tables</h3>
+    {% for table in tables %}
+      {{ table|safe }}
+    {% endfor %}
+
+    <form action="/confirm/{{ filename }}" method="post">
+      <button type="submit">Confirm & Download Word</button>
+    </form>
+  </body>
+</html>
