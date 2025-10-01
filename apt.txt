@@ -1,7 +1,4 @@
 tesseract-ocr
 poppler-utils
 ghostscript
-tesseract-ocr
-poppler-utils
-ghostscript
 ocrmypdf

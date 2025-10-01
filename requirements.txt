@@ -4,5 +4,6 @@ pdf2image
 camelot-py[cv]
 python-docx
 PyPDF2
-pandas
+pdf2docx
+ocrmypdf
 gunicorn
