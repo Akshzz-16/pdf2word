@@ -1,7 +1,8 @@
-flask
-pdf2image
+Flask
 pytesseract
+pdf2image
 camelot-py[cv]
 python-docx
+PyPDF2
 pandas
 gunicorn

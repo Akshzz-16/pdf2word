@@ -1,10 +1,30 @@
 <!DOCTYPE html>
-<html>
-  <body>
-    <h2>Upload PDF</h2>
-    <form action="/" method="post" enctype="multipart/form-data">
-      <input type="file" name="pdf" accept=".pdf" required>
-      <button type="submit">Upload</button>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PDF → Word Converter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&family=Fira+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>PDF → Word Converter</h1>
+
+    <form id="uploadForm" method="POST" enctype="multipart/form-data">
+      <div id="dropArea">
+        <p>Drag & Drop your PDF here or click to browse</p>
+        <input type="file" id="fileInput" name="pdf" accept="application/pdf">
+      </div>
+
+      <button type="submit" id="uploadBtn">Upload & Preview</button>
     </form>
-  </body>
+
+    <div class="preview-section" id="previewSection">
+      <p class="placeholder">Your preview will appear here after upload.</p>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
 </html>

@@ -1,20 +1,37 @@
 <!DOCTYPE html>
-<html>
-  <body>
-    <h2>Preview Extracted Content</h2>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Preview — PDF → Word</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&family=Fira+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Preview</h1>
 
-    <h3>Text</h3>
-    {% for text in text_pages %}
-      <pre>{{ text }}</pre>
-    {% endfor %}
+    <div class="preview-section">
+      {% if text_pages %}
+        {% for text in text_pages %}
+          <div class="text-preview"><pre>{{ text }}</pre></div>
+        {% endfor %}
+      {% else %}
+        <p class="placeholder">No text extracted.</p>
+      {% endif %}
 
-    <h3>Tables</h3>
-    {% for table in tables %}
-      {{ table|safe }}
-    {% endfor %}
+      {% if tables %}
+        {% for table_html in tables %}
+          {{ table_html|safe }}
+        {% endfor %}
+      {% else %}
+        <p class="placeholder">No tables detected.</p>
+      {% endif %}
+    </div>
 
-    <form action="/confirm/{{ filename }}" method="post">
-      <button type="submit">Confirm & Download Word</button>
+    <form action="{{ url_for('confirm', filename=filename) }}" method="POST">
+      <button type="submit" id="downloadBtn">Confirm & Download Word</button>
     </form>
-  </body>
+  </div>
+</body>
 </html>
