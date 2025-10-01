@@ -109,6 +109,13 @@ def confirm(filename):
 
     return send_file(output_path, as_attachment=True)
 
+import shutil
+
+@app.route("/check")
+def check_tools():
+    tools = ["tesseract", "ocrmypdf", "gs", "pdftoppm"]
+    return {tool: shutil.which(tool) for tool in tools}
+
 
 if __name__ == "__main__":
     app.run(debug=True)
