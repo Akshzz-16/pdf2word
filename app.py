@@ -5,6 +5,7 @@ import pytesseract
 import camelot
 from docx import Document
 from PyPDF2 import PdfReader
+import platform
 
 app = Flask(__name__)
 
@@ -13,15 +14,18 @@ OUTPUT_FOLDER = "outputs"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
+# Use explicit Tesseract path on Linux (Render)
+if platform.system() != "Windows":
+    pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+
 def ocr_pdf(input_path, output_path):
-    """
-    Run OCRmyPDF to add searchable text layer to scanned PDFs.
-    Falls back gracefully if OCRmyPDF is not installed (Windows dev mode).
-    """
+    """Run OCRmyPDF if available; skip gracefully on Windows or if missing."""
+    if platform.system() == "Windows":
+        # Skip OCRmyPDF on Windows
+        return input_path
     if shutil.which("ocrmypdf") is None:
         print("⚠️ OCRmyPDF not found. Skipping OCR step.")
-        return input_path  # fallback: return original PDF
-
+        return input_path
     try:
         subprocess.run(
             ["ocrmypdf", "--skip-text", "--force-ocr", input_path, output_path],
@@ -32,7 +36,6 @@ def ocr_pdf(input_path, output_path):
         print(f"⚠️ OCRmyPDF failed: {e}")
         return input_path
 
-
 @app.route("/", methods=["GET", "POST"])
 def upload_file():
     if request.method == "POST":
@@ -40,22 +43,20 @@ def upload_file():
         filepath = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(filepath)
 
-        # Step 1: Check if PDF has embedded text
+        # Detect if PDF has digital text
         reader = PdfReader(filepath)
         has_text = any(page.extract_text() for page in reader.pages)
 
         processed_pdf = filepath
-        if not has_text:  # scanned PDF → run OCR if possible
+        if not has_text:
             processed_pdf = filepath.replace(".pdf", "_ocr.pdf")
             processed_pdf = ocr_pdf(filepath, processed_pdf)
 
-        # Step 2: Extract text
-        text_pages = []
+        # Extract text using pytesseract from PDF images
         pages = convert_from_path(processed_pdf, dpi=200)
-        for page in pages:
-            text_pages.append(pytesseract.image_to_string(page))
+        text_pages = [pytesseract.image_to_string(page) for page in pages]
 
-        # Step 3: Extract tables
+        # Extract tables using Camelot
         try:
             tables = camelot.read_pdf(processed_pdf, pages="all")
             tables_preview = [t.df.to_html(classes="table-preview") for t in tables]
@@ -76,7 +77,7 @@ def upload_file():
 def confirm(filename):
     filepath = os.path.join(UPLOAD_FOLDER, filename)
 
-    # Check if scanned
+    # Detect if PDF has digital text
     reader = PdfReader(filepath)
     has_text = any(page.extract_text() for page in reader.pages)
 
@@ -85,12 +86,13 @@ def confirm(filename):
         processed_pdf = filepath.replace(".pdf", "_ocr.pdf")
         processed_pdf = ocr_pdf(filepath, processed_pdf)
 
-    # Build Word doc
+    # Build Word document
     doc = Document()
     pages = convert_from_path(processed_pdf, dpi=200)
     for page in pages:
         doc.add_paragraph(pytesseract.image_to_string(page))
 
+    # Add tables
     try:
         tables = camelot.read_pdf(processed_pdf, pages="all")
         for t in tables:
